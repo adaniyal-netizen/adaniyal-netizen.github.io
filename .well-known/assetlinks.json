@@ -1,8 +1,8 @@
 [{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "io.github.adaniyal_netizen.twa",
-    "sha256_cert_fingerprints": ["8F:E8:38:00:AF:6B:76:BF:AD:BD:2E:77:3B:91:AD:52:03:B7:F3:0E:40:7B:A8:5C:DD:A1:73:B0:C4:79:9D:2B"]
-  }
-}]
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.adaniyal_netizen.twa",
+        "sha256_cert_fingerprints": ["77:EE:AE:4B:AF:3B:43:D0:D7:31:09:51:28:8A:12:0D:5E:23:FE:45:A9:15:F9:78:35:D2:D9:FB:78:2E:E0:57"]
+      }
+    }]
