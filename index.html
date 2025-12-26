@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Haven | Enterprise HR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg: #f3f4f6; --sidebar: #1e293b; --card: #ffffff;
+            --blue: #3b82f6; --blue-dark: #1d4ed8; --red: #ef4444; --green: #10b981;
+            --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --card: #1e293b;
+                --text: #f1f5f9;
+                --text-light: #94a3b8;
+                --border: #334155;
+                --sidebar: #0f172a;
+            }
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* SIDEBAR */
+        .sidebar { 
+            width: 250px; 
+            background: var(--sidebar); 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            flex-shrink: 0; 
+            transition: width 0.3s;
+        }
+        .brand { 
+            font-size: 1.5rem; 
+            font-weight: 800; 
+            margin-bottom: 40px; 
+            color: white; 
+            letter-spacing: -0.5px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .menu-label { 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            color: #94a3b8; 
+            font-weight: 700; 
+            margin-bottom: 10px; 
+            margin-top: 20px; 
+        }
+        .nav-btn { 
+            background: transparent; 
+            border: none; 
+            width: 100%; 
+            text-align: left; 
+            padding: 12px 15px; 
+            border-radius: 8px; 
+            color: #cbd5e1; 
+            font-weight: 500; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-size: 0.95rem; 
+            margin-bottom: 5px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .nav-btn:hover { 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+        }
+        .nav-btn.active { 
+            background: var(--blue); 
+            color: white; 
+            font-weight: 600; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+        }
+
+        /* MAIN AREA */
+        .main-content { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            position: relative; 
+        }
+        .top-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .page-title { 
+            font-size: 1.5rem; 
+            font-weight: 800; 
+            color: var(--text); 
+        }
+        
+        /* ADMIN COMPONENTS */
+        .date-control { 
+            background: var(--card); 
+            padding: 5px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            display: flex; 
+            align-items: center; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+        }
+        .date-btn { 
+            border: none; 
+            background: transparent; 
+            width: 30px; 
+            height: 30px; 
+            cursor: pointer; 
+            color: var(--text-light); 
+            border-radius: 4px; 
+        }
+        .date-btn:hover { 
+            background: #f1f5f9; 
+            color: var(--blue); 
+        }
+        .date-display { 
+            font-weight: 700; 
+            padding: 0 15px; 
+            font-size: 0.9rem; 
+            min-width: 140px; 
+            text-align: center; 
+        }
+
+        .month-tag { 
+            font-size: 0.7rem; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            padding: 6px 10px; 
+            border-radius: 6px; 
+            margin-right: 5px; 
+            letter-spacing: 0.5px; 
+        }
+        .tag-curr { background: #dcfce7; color: #15803d; }
+        .tag-last { background: #fee2e2; color: #991b1b; }
+        .tag-next { background: #fef3c7; color: #92400e; }
+        .tag-hidden { display: none; }
+
+        /* GRID */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 25px; 
+        }
+        .emp-card { 
+            background: var(--card); 
+            border-radius: 16px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+            border: 1px solid var(--border); 
+            position: relative; 
+            transition: transform 0.2s; 
+        }
+        .emp-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
+        }
+        
+        .card-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 15px; 
+        }
+        .emp-avatar { 
+            width: 40px; 
+            height: 40px; 
+            background: #e0f2fe; 
+            color: var(--blue); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 800; 
+            font-size: 1.1rem; 
+            position: relative; 
+        }
+        .status-dot { 
+            width: 10px; 
+            height: 10px; 
+            background: #cbd5e1; 
+            border: 2px solid var(--card); 
+            border-radius: 50%; 
+            position: absolute; 
+            bottom: 0; 
+            right: 0; 
+        }
+        .status-present { background: var(--green); }
+
+        .emp-info h3 { margin: 0; font-size: 1.1rem; }
+        .emp-info p { margin: 0; font-size: 0.8rem; color: var(--text-light); }
+        .settings-btn { 
+            background: transparent; 
+            border: none; 
+            color: #94a3b8; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            padding: 5px; 
+            border-radius: 4px; 
+        }
+        .settings-btn:hover { 
+            background: #f1f5f9; 
+            color: var(--blue); 
+        }
+
+        .balance-section { 
+            text-align: center; 
+            padding: 15px 0; 
+            border-top: 1px dashed var(--border); 
+            border-bottom: 1px dashed var(--border); 
+            margin: 10px 0; 
+        }
+        .net-pay-label { 
+            font-size: 0.7rem; 
+            font-weight: 700; 
+            color: var(--text-light); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        .net-pay-val { 
+            font-size: 2rem; 
+            font-weight: 800; 
+            color: var(--green); 
+        }
+        .deduction-text { 
+            font-size: 0.75rem; 
+            color: var(--red); 
+            background: #fef2f2; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            display: inline-block; 
+            margin-top: 5px; 
+            font-weight: 600; 
+        }
+
+        .tracking-box { 
+            background: #eff6ff; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 0; 
+            border: 1px solid #dbeafe; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .tracking-left { flex: 1; min-width: 0; }
+        .tracking-right { flex-shrink: 0; display: flex; align-items: center; }
+        .track-info { font-size: 0.8rem; font-weight: 600; color: #1e40af; }
+        .track-val { font-size: 1.1rem; font-weight: 800; color: var(--blue); }
+        .edit-track-btn { 
+            font-size: 0.7rem; 
+            background: var(--card); 
+            border: 1px solid #bfdbfe; 
+            color: var(--blue); 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin-left: 5px; 
+            font-weight: 600; 
+        }
+        .record-btn { 
+            background: var(--blue); 
+            color: white; 
+            border: none; 
+            padding: 0 15px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+        }
+
+        /* ATTENDANCE TABLE (ADMIN) */
+        .att-table-container { 
+            background: var(--card); 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            overflow: hidden; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            text-align: left; 
+            padding: 15px; 
+            background: #f8fafc; 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+            color: #64748b; 
+            border-bottom: 1px solid var(--border); 
+        }
+        td { 
+            padding: 15px; 
+            border-bottom: 1px solid #f1f5f9; 
+            font-size: 0.9rem; 
+        }
+        tr:last-child td { border-bottom: none; }
+        
+        .present-badge { 
+            background: #dcfce7; 
+            color: #166534; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+        }
+        .absent-badge { 
+            background: #f1f5f9; 
+            color: #94a3b8; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+        }
+        .red-absent-badge { 
+            background: #fee2e2; 
+            color: #991b1b; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+        }
+        .leave-badge { 
+            background: #fef9c3; 
+            color: #854d0e; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            cursor: help; 
+            border: 1px solid #fde047; 
+        }
+        
+        .text-red { color: #dc2626; font-weight: 700; }
+        .text-norm { color: #334155; }
+        .text-na { color: #94a3b8; font-style: italic; }
+
+        /* LOAN PORTAL (WALLET) */
+        .wallet-card { 
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+            color: white; 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); 
+            margin-bottom: 30px; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .wallet-amount { 
+            font-size: 3rem; 
+            font-weight: 800; 
+            margin: 10px 0; 
+            letter-spacing: -1px; 
+        }
+        .wallet-circles { 
+            position: absolute; 
+            top: -50px; 
+            right: -50px; 
+            width: 200px; 
+            height: 200px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 50%; 
+            pointer-events: none; 
+        }
+        .input-box { 
+            flex: 1; 
+            padding: 10px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            font-size: 0.9rem; 
+            outline: none; 
+            transition: border 0.2s; 
+            background: var(--card);
+            color: var(--text);
+        }
+
+        /* ATTENDANCE PORTAL (UPDATED COLORS) */
+        .att-big-card { 
+            background: var(--card); 
+            border-radius: 16px; 
+            padding: 40px; 
+            text-align: center; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+            border: 1px solid var(--border); 
+            max-width: 500px; 
+            margin: 0 auto; 
+        }
+        
+        /* FIX: White text for visibility on dark card */
+        .digital-clock { 
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            color: #ffffff; 
+            margin-bottom: 10px; 
+            letter-spacing: -1px; 
+            font-variant-numeric: tabular-nums; 
+        }
+        .digital-date { 
+            color: rgba(255,255,255,0.8); 
+            font-size: 1rem; 
+            margin-bottom: 40px; 
+            font-weight: 500; 
+        }
+        
+        .punch-btn { 
+            width: 200px; 
+            height: 200px; 
+            border-radius: 50%; 
+            border: none; 
+            font-size: 1.5rem; 
+            font-weight: 800; 
+            color: white; 
+            cursor: pointer; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            transition: transform 0.2s; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto; 
+        }
+        .punch-btn:active { transform: scale(0.95); }
+        .btn-in { background: #22c55e; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3); }
+        .btn-out { background: #ef4444; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3); }
+        .btn-done { background: #cbd5e1; cursor: default; box-shadow: none; color: #64748b; }
+        .btn-locked { background: #1e293b; cursor: not-allowed; box-shadow: none; opacity: 0.7; }
+
+        .req-history-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px 0; 
+            border-bottom: 1px solid var(--border); 
+            align-items: center; 
+        }
+        .status-badge { 
+            font-size: 0.7rem; 
+            padding: 3px 8px; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+        }
+        .status-paid { background: #ecfdf5; color: #047857; }
+        .status-pending { background: #fff7ed; color: #c2410c; }
+
+        /* MODALS & SELECT FIX */
+        select { 
+            background-color: var(--card) !important; 
+            color: var(--text) !important; 
+            border: 1px solid var(--border); 
+        }
+        option { 
+            background-color: var(--card); 
+            color: var(--text); 
+        }
+
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.4); 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000; 
+            backdrop-filter: blur(2px); 
+        }
+        .modal { 
+            background: var(--card); 
+            padding: 30px; 
+            border-radius: 16px; 
+            width: 450px; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
+        }
+        .modal h3 { 
+            margin-top: 0; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+        }
+        
+        .modal-btn-primary { 
+            width: 100%; 
+            padding: 12px; 
+            background: var(--blue); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 1rem; 
+            cursor: pointer; 
+            margin-top: 10px; 
+        }
+        .modal-btn-secondary { 
+            width: 100%; 
+            padding: 12px; 
+            background: #f1f5f9; 
+            color: var(--text); 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 1rem; 
+            cursor: pointer; 
+            margin-top: 10px; 
+        }
+        .modal-btn-danger { 
+            width: 100%; 
+            padding: 12px; 
+            background: #fee2e2; 
+            color: var(--red); 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 1rem; 
+            cursor: pointer; 
+            margin-top: 10px; 
+        }
+
+        .history-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 0; 
+            border-bottom: 1px dashed var(--border); 
+            font-size: 0.9rem; 
+            align-items: center; 
+        }
+        .del-btn { 
+            color: #cbd5e1; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            margin-left: 10px; 
+        }
+        .del-btn:hover { color: var(--red); }
+        .close-modal { 
+            background: #f1f5f9; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            width: 100%; 
+            margin-top: 15px; 
+        }
+
+        .alert-box { 
+            background: #fffbeb; 
+            border: 1px solid #fcd34d; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            display: none; 
+        }
+        .alert-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: 5px; 
+            background: white; 
+            padding: 8px; 
+            border-radius: 6px; 
+        }
+        .hidden { display: none; }
+        
+        /* NOTIFICATION SYSTEM */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+        .notification {
+            background: var(--card);
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification.success { border-left-color: #10b981; }
+        .notification.warning { border-left-color: #f59e0b; }
+        .notification.error { border-left-color: #ef4444; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* LOADING SPINNER */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        /* SEARCH BOX */
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            body { 
+                flex-direction: column; 
+                height: auto; 
+                overflow: auto; 
+            }
+            .sidebar { 
+                width: 100%; 
+                flex-direction: row; 
+                flex-wrap: wrap;
+                padding: 15px; 
+                height: auto;
+                gap: 8px;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+            .brand { 
+                margin-bottom: 15px; 
+                width: 100%;
+                justify-content: center;
+            }
+            .menu-label {
+                display: none;
+            }
+            .nav-btn { 
+                padding: 10px 12px; 
+                font-size: 0.85rem;
+                width: auto;
+                flex: 1;
+                min-width: 110px;
+                justify-content: center;
+            }
+            .main-content { 
+                padding: 20px; 
+                min-height: calc(100vh - 150px);
+            }
+            .grid { 
+                grid-template-columns: 1fr; 
+                gap: 15px;
+            }
+            .top-bar { 
+                flex-direction: column; 
+                gap: 15px; 
+                align-items: flex-start; 
+            }
+            
+            /* Mobile-friendly punch button */
+            .punch-btn { 
+                width: 150px !important; 
+                height: 150px !important;
+                font-size: 1.2rem !important;
+            }
+            .digital-clock { 
+                font-size: 2.5rem !important; 
+            }
+            
+            /* Better table display */
+            .att-table-container { 
+                overflow-x: auto;
+                font-size: 0.8rem;
+            }
+            table {
+                min-width: 600px;
+            }
+            
+            /* Modal adjustments */
+            .modal { 
+                width: 90% !important; 
+                padding: 20px !important;
+                margin: 10px;
+            }
+            
+            .wallet-card {
+                padding: 20px !important;
+            }
+            .wallet-amount {
+                font-size: 2.2rem !important;
+            }
+        }
+
+        /* Tablet adjustments */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .sidebar { width: 220px; }
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        /* PRINT STYLES */
+        @media print {
+            .sidebar, .top-bar button, .settings-btn, 
+            .nav-btn, .modal-overlay, .punch-btn,
+            .notification-container {
+                display: none !important;
+            }
+            
+            body { 
+                overflow: visible; 
+                height: auto; 
+                background: white !important;
+                color: black !important;
+            }
+            .main-content { 
+                overflow: visible; 
+                padding: 0 !important;
+            }
+            
+            .emp-card { 
+                break-inside: avoid;
+                border: 1px solid #000 !important;
+                margin-bottom: 10px;
+                box-shadow: none !important;
+            }
+            
+            .wallet-card {
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NOTIFICATION CONTAINER -->
+<div class="notification-container" id="notificationContainer"></div>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
+
+<div class="sidebar">
+    <div class="brand"><span style="font-size:1.8rem;">📦</span> Pro Haven</div>
+    <div class="menu-label">Management</div>
+    <button class="nav-btn active" id="btnAdmin" onclick="switchView('admin')">📊 Admin Dashboard</button>
+    <button class="nav-btn" id="btnAttLogs" onclick="switchView('adminAttLogs')">📋 Attendance Logs</button>
+    <button class="nav-btn" onclick="openAddModal()">➕ Add Employee</button>
+    
+    <div class="menu-label">Staff Zone</div>
+    <button class="nav-btn" id="btnLoan" onclick="switchView('loan')">💸 Advance Loan Portal</button>
+    <button class="nav-btn" id="btnAtt" onclick="switchView('attendance')">📅 Attendance Portal</button>
+    <button class="nav-btn" id="btnLeave" onclick="switchView('leave')">🏖️ Leave Portal</button>
+</div>
+
+<div class="main-content">
+    
+    <div id="adminPanel" class="hidden">
+        <div class="top-bar">
+            <div class="page-title">Dashboard</div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <div class="date-control">
+                    <span id="monthStatus" class="month-tag tag-curr">Current Month</span>
+                    <button class="date-btn" onclick="changeMonth(-1)">‹</button>
+                    <span class="date-display" id="monthDisplay">Loading...</span>
+                    <button class="date-btn" onclick="changeMonth(1)">›</button>
+                </div>
+                <button onclick="setOfficeIP()" style="background:#0f172a; color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:700; cursor:pointer;">🏢 Set Office IP</button>
+                <button onclick="exportBackup()" style="background:#10b981; color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:700; cursor:pointer;">💾 Backup</button>
+                <button onclick="document.getElementById('importBackupInput').click()" style="background:#f59e0b; color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:700; cursor:pointer;">📤 Restore</button>
+                <button onclick="adminLogout()" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 15px; border-radius:8px; font-weight:700; cursor:pointer;">Lock 🔒</button>
+            </div>
+        </div>
+        
+        <!-- SEARCH BOX -->
+        <input type="text" id="empSearch" class="search-box" placeholder="🔍 Search employees by name..." onkeyup="filterEmployees()">
+        
+        <div id="pendingAlert" class="alert-box">
+            <strong style="color:#b45309">⚠️ Action Required</strong>
+            <div id="pendingList"></div>
+        </div>
+        <div class="grid" id="adminGrid"></div>
+    </div>
+
+    <div id="adminAttPanel" class="hidden">
+        <div class="top-bar">
+            <div class="page-title">Attendance Logs</div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <div class="date-control">
+                    <span class="date-display" id="attLogDisplay">Loading...</span>
+                </div>
+                <button onclick="clearHistory()" style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:700; cursor:pointer;">🗑️ Reset Logs</button>
+                <button onclick="exportAttendance()" style="background:#0f172a; color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px;">📥 Export</button>
+                <button onclick="adminLogout()" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 15px; border-radius:8px; font-weight:700; cursor:pointer;">Lock 🔒</button>
+            </div>
+        </div>
+        <div class="att-table-container">
+            <table><thead><tr><th>Date</th><th>Employee</th><th>In Time</th><th>Out Time</th><th>Status</th></tr></thead><tbody id="attTableBody"></tbody></table>
+        </div>
+    </div>
+
+    <div id="adminLoginPanel" class="hidden">
+        <div style="max-width:400px; margin:50px auto; background:var(--card); padding:40px; border-radius:16px; border:1px solid var(--border); text-align:center;">
+            <div style="font-size:3rem; margin-bottom:10px;">🔐</div>
+            <h2 style="margin-top:0;">Admin Locked</h2>
+            <p style="color:var(--text-light); margin-bottom:20px;">Enter Master Key to access management.</p>
+            <input type="password" id="adminMasterPin" style="width:100%; padding:15px; text-align:center; font-size:1.5rem; letter-spacing:5px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px; box-sizing:border-box; background:var(--card); color:var(--text);" placeholder="••••" maxlength="4" onkeyup="checkAdminEnter(event)">
+            <button class="record-btn" style="width:100%; padding:12px;" onclick="attemptAdminLogin()">Unlock System</button>
+            <p style="display:none;">
+    Master Key: <span id="masterKeyDisplay"></span>
+</p>
+        </div>
+    </div>
+
+    <div id="loginSection" class="hidden">
+        <div style="max-width:400px; margin:50px auto; background:var(--card); padding:30px; border-radius:16px; border:1px solid var(--border); text-align:center;">
+            <h3>Welcome Back</h3>
+            <p style="color:var(--text-light); margin-bottom:20px;">Select your profile to continue</p>
+            <select id="empSelect" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:15px; background:var(--card); color:var(--text);"></select>
+            <input type="password" id="loginPin" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:15px; box-sizing:border-box; background:var(--card); color:var(--text);" placeholder="Enter 4-Digit PIN" maxlength="4">
+            <button class="record-btn" style="width:100%; padding:12px;" onclick="login()">Access Portal</button>
+            <p style="margin-top:10px; font-size:0.8rem; color:var(--text-light);">Forgot PIN? Contact Admin</p>
+        </div>
+    </div>
+
+    <div id="loanPanel" class="hidden">
+        <div class="top-bar">
+            <div class="page-title">Advance Loans</div>
+            <button onclick="logout()" style="float:right; background:transparent; border:none; color:var(--text-light); cursor:pointer; font-weight:600;">← Logout</button>
+        </div>
+        <div style="max-width:600px; margin:0 auto;">
+            <h2 id="loanName" style="margin-top:0;">Hello, User</h2>
+            <div class="wallet-card">
+                <div class="wallet-circles"></div>
+                <div class="wallet-label">Upcoming Net Pay</div>
+                <div class="wallet-amount" id="dashNet">0</div>
+                <div class="wallet-info">Base Salary - This Month's Advances</div>
+                <button onclick="showEmployeeStats(currentUser.id)" style="margin-top:15px; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); color:white; padding:8px 15px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;">
+                    📊 View My Stats
+                </button>
+            </div>
+            <h3 style="margin-bottom:15px;">Need an Advance?</h3>
+            <div style="display:flex; gap:10px; margin-bottom:30px; flex-wrap:wrap;">
+                <input type="number" id="reqAmount" class="input-box" placeholder="Enter amount (e.g. 1000)">
+                <button class="record-btn" onclick="submitRequest()">Submit Request</button>
+            </div>
+            <h3 style="margin-bottom:15px;">Recent Activity</h3>
+            <div id="dashHistory" style="background:var(--card); padding:20px; border-radius:16px; border:1px solid var(--border);"></div>
+        </div>
+    </div>
+
+    <div id="attPanel" class="hidden">
+        <div class="top-bar">
+            <div class="page-title">My Attendance</div>
+            <button onclick="logout()" style="float:right; background:transparent; border:none; color:var(--text-light); cursor:pointer; font-weight:600;">← Logout</button>
+        </div>
+        
+        <div style="max-width:600px; margin:0 auto;">
+            <h2 id="attName" style="margin-top:0;">Hello, User</h2>
+            
+            <div class="wallet-card" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%);">
+                <div class="wallet-circles"></div>
+                <div style="text-align:center;">
+                    <div class="digital-clock" id="clockDisplay">00:00</div>
+                    <div class="digital-date" id="dateDisplay">Monday, 21 Dec</div>
+                    <button id="attBtn" class="punch-btn btn-in" onclick="toggleAttendance()">
+                        <span id="attBtnText">Checking Location...</span>
+                    </button>
+                    <div id="ipMsg" style="margin-top:10px; color:#cbd5e1; font-size:0.8rem;"></div>
+                </div>
+            </div>
+            
+            <h3 style="margin-bottom:15px;">Attendance Log (This Month)</h3>
+            <div id="attHistoryList" style="background:var(--card); padding:20px; border-radius:16px; border:1px solid var(--border);"></div>
+        </div>
+    </div>
+
+    <div id="leavePanel" class="hidden">
+        <div class="top-bar">
+            <div class="page-title">Leave Portal</div>
+            <button onclick="logout()" style="float:right; background:transparent; border:none; color:var(--text-light); cursor:pointer; font-weight:600;">← Logout</button>
+        </div>
+        
+        <div style="max-width:600px; margin:0 auto;">
+            <h2 id="leaveName" style="margin-top:0;">Hello, User</h2>
+            
+            <div style="background:var(--card); padding:30px; border-radius:16px; border:1px solid var(--border); text-align:center; margin-bottom:30px;">
+                <div style="font-size:3rem; margin-bottom:10px;">🏖️</div>
+                <h3>Apply for Leave</h3>
+                <p style="color:var(--text-light); margin-bottom:20px;">Submitting a leave request will mark you as "On Leave" for that day.</p>
+                <button onclick="openLeaveModal()" style="width:100%; padding:15px; border-radius:12px; background:var(--blue); color:white; font-weight:700; border:none; cursor:pointer;">
+                    Fill Application Form
+                </button>
+            </div>
+
+            <h3 style="margin-bottom:15px;">My Leave History</h3>
+            <div id="leaveHistoryList" style="background:var(--card); padding:20px; border-radius:16px; border:1px solid var(--border);">
+                </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- HIDDEN FILE INPUT FOR BACKUP RESTORE -->
+<input type="file" id="importBackupInput" accept=".json" style="display:none" onchange="importBackup(event)">
+
+<!-- MODALS -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <h3 id="modalTitle">Add New Team Member</h3>
+        <input type="hidden" id="editEmpId">
+        <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Full Name</label>
+        <input type="text" id="newEmpName" class="input-box" placeholder="e.g. Ali Khan" style="width:100%; margin-bottom:15px; box-sizing:border-box;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="flex:1;"><label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Work Start</label><input type="time" id="newEmpStart" class="input-box" style="width:100%; margin-bottom:15px; box-sizing:border-box;"></div>
+            <div style="flex:1;"><label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Work End</label><input type="time" id="newEmpEnd" class="input-box" style="width:100%; margin-bottom:15px; box-sizing:border-box;"></div>
+        </div>
+        <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">WhatsApp Number</label><input type="text" id="newEmpPhone" class="input-box" style="width:100%; margin-bottom:15px; box-sizing:border-box;">
+        <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Login PIN (4 digits)</label><input type="number" id="newEmpPin" class="input-box" maxlength="4" style="width:100%; margin-bottom:15px; box-sizing:border-box;">
+        <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Monthly Salary</label><input type="number" id="newEmpSalary" class="input-box" style="width:100%; margin-bottom:20px; box-sizing:border-box;">
+        <button class="modal-btn-primary" onclick="saveEmployee()">Save Employee</button>
+        <button id="btnDeleteEmp" class="modal-btn-danger hidden" onclick="deleteEmployee()">Delete Employee</button>
+        <button class="modal-btn-secondary" onclick="closeModal('addModal')">Cancel</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="manualModal">
+    <div class="modal">
+        <h3 id="manualTitle">Record Manual Cash</h3>
+        <input type="hidden" id="manualEmpId">
+        <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Amount</label>
+        <input type="number" id="manualAmount" class="input-box" style="width:100%; margin-bottom:20px; box-sizing:border-box;">
+        <button class="modal-btn-primary" onclick="saveManualAdvance()">Record Cash</button>
+        <button class="modal-btn-secondary" onclick="closeModal('manualModal')">Cancel</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="leaveModal">
+    <div class="modal">
+        <h3>Apply for Leave</h3>
+        <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Select Date</label>
+        <input type="date" id="leaveDate" class="input-box" style="width:100%; margin-bottom:15px; box-sizing:border-box;">
+        <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Reason (Compulsory)</label>
+        <textarea id="leaveReason" class="input-box" rows="3" style="width:100%; margin-bottom:20px; box-sizing:border-box;"></textarea>
+        <button class="modal-btn-primary" onclick="submitLeave()">Submit Application</button>
+        <button class="modal-btn-secondary" onclick="closeModal('leaveModal')">Cancel</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="successModal">
+    <div class="modal" style="text-align:center; width:300px;">
+        <div style="font-size:3rem; margin-bottom:10px;">✅</div>
+        <h3 style="border:none; margin-bottom:10px;">Success!</h3>
+        <p style="color:#64748b; margin-bottom:20px;">Operation Completed.</p>
+        <button class="modal-btn-primary" onclick="closeModal('successModal')">Great</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="historyModal">
+    <div class="modal">
+        <h3 id="histTitle">Tracking History</h3>
+        <div id="histList"></div>
+        <button class="close-modal" onclick="closeModal('historyModal')">Close</button>
+    </div>
+</div>
+
+<script>
+// ✅ GLOBAL DATABASE CONTAINER
+// We use 'window.db' so the new Module Scripts can access it.
+window.db = {
+    emps: [],
+    txns: [],
+    attendance: [],
+    leaves: []
+};
+
+// Also create a shortcut so you don't have to rewrite old code
+const db = window.db;
+    
+    let officeIP = localStorage.getItem('ph_office_ip') || "";
+    let viewDate = new Date(); viewDate.setDate(1);
+    let currentUser = null;
+    let isAdminUnlocked = false; 
+    let targetViewAfterLogin = 'loan'; 
+
+    // INITIALIZE MASTER KEY SYSTEM
+    function initMasterKey() {
+        if(!localStorage.getItem('ph_master_key')) {
+            /* const randomKey = Math.floor(1000 + Math.random() * 9000).toString();
+            localStorage.setItem('ph_master_key', randomKey);
+            /*showNotification(`🔐 Master Key Generated: ${randomKey} - Save this securely!`, 'warning', 10000);
+            document.getElementById('masterKeyDisplay').textContent = randomKey;*/
+        } else {
+            document.getElementById('masterKeyDisplay').textContent = localStorage.getItem('ph_master_key');
+        } 
+        return localStorage.getItem('ph_master_key');
+    }
+    
+    const MASTER_KEY = initMasterKey();
+
+    // NOTIFICATION SYSTEM
+    function showNotification(message, type = 'info', duration = 3000) {
+        const container = document.getElementById('notificationContainer');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <div style="font-size:1.2rem;">${type==='success'?'✅':type==='error'?'❌':'ℹ️'}</div>
+            <div style="flex:1;">${message}</div>
+        `;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+    
+    // LOADING FUNCTIONS
+    function showLoading() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    function save() {
+        localStorage.setItem('ph_emps', JSON.stringify(db.emps));
+        localStorage.setItem('ph_txns', JSON.stringify(db.txns));
+        localStorage.setItem('ph_att', JSON.stringify(db.attendance));
+        localStorage.setItem('ph_leaves', JSON.stringify(db.leaves));
+        renderAdmin();
+    }
+
+    function formatDate(iso) { 
+        if(!iso) return ''; 
+        const [y, m, d] = iso.split('-'); 
+        return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); 
+    }
+    
+    function updateMonthStatus() { 
+        const diff = (viewDate.getFullYear() - new Date().getFullYear()) * 12 + (viewDate.getMonth() - new Date().getMonth()); 
+        const tag = document.getElementById('monthStatus'); 
+        tag.className = 'month-tag'; 
+        if (diff === 0) { 
+            tag.innerText = "Current Month"; 
+            tag.classList.add('tag-curr'); 
+        } else if (diff === -1) { 
+            tag.innerText = "Last Month"; 
+            tag.classList.add('tag-last'); 
+        } else if (diff === 1) { 
+            tag.innerText = "Next Month"; 
+            tag.classList.add('tag-next'); 
+        } else { 
+            tag.classList.add('tag-hidden'); 
+        } 
+    }
+    
+    function getKeys() { 
+        const pY = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1); 
+        const cY = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1); 
+        return { 
+            display: viewDate.toLocaleString('default', { month: 'long', year: 'numeric' }), 
+            prevLabel: pY.toLocaleString('default', { month: 'short' }), 
+            currLabel: cY.toLocaleString('default', { month: 'short' }), 
+            prevIso: `${pY.getFullYear()}-${String(pY.getMonth()+1).padStart(2,'0')}`, 
+            currIso: `${cY.getFullYear()}-${String(cY.getMonth()+1).padStart(2,'0')}` 
+        }; 
+    }
+    
+    function changeMonth(dir) { 
+        viewDate.setMonth(viewDate.getMonth() + dir); 
+        renderAdmin(); 
+        renderAdminAttLog(); 
+    }
+
+    // ADMIN LOGIN FUNCTIONS
+    function attemptAdminLogin() { 
+        if(document.getElementById('adminMasterPin').value === MASTER_KEY) { 
+            isAdminUnlocked = true; 
+            document.getElementById('adminMasterPin').value = ''; 
+            document.getElementById('adminLoginPanel').classList.add('hidden'); 
+            document.getElementById('adminPanel').classList.remove('hidden'); 
+            document.getElementById('btnAdmin').classList.add('active'); 
+            renderAdmin(); 
+            showNotification("Admin Access Granted", "success");
+        } else { 
+            showNotification("❌ Access Denied - Wrong Master Key", "error"); 
+        } 
+    }
+    
+    function checkAdminEnter(e) { 
+        if(e.key === "Enter") attemptAdminLogin(); 
+    }
+    
+    function adminLogout() { 
+        isAdminUnlocked = false; 
+        showNotification("Admin Panel Locked", "warning");
+        switchView('admin'); 
+    }
+
+    // EMPLOYEE LOGIN
+    function login() { 
+        const id = parseInt(document.getElementById('empSelect').value); 
+        const pin = document.getElementById('loginPin').value; 
+        if(!id) {
+            showNotification("Please select your profile", "error");
+            return;
+        }
+        currentUser = db.emps.find(e => e.id === id); 
+        if (pin === currentUser.pin || pin === MASTER_KEY) { 
+            document.getElementById('loginSection').classList.add('hidden'); 
+            document.getElementById('loginPin').value = ''; 
+            showNotification(`Welcome ${currentUser.name}!`, "success");
+            
+            if(targetViewAfterLogin === 'attendance') showAttendancePanel(); 
+            else if(targetViewAfterLogin === 'leave') showLeavePanel();
+            else showLoanPanel(); 
+        } else { 
+            showNotification("Incorrect PIN", "error"); 
+        } 
+    }
+    
+    function logout() { 
+        if(currentUser) {
+            showNotification(`Logged out - ${currentUser.name}`, "info");
+        }
+        currentUser = null; 
+        switchView('admin'); 
+    }
+
+    // NAVIGATION
+    function switchView(view) {
+        // Hide all panels
+        ['adminPanel','adminLoginPanel','loginSection','loanPanel','attPanel','adminAttPanel','leavePanel'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        
+        // Remove active from all buttons
+        ['btnAdmin','btnEmp','btnLoan','btnAtt','btnAttLogs','btnLeave'].forEach(id => { 
+            const el = document.getElementById(id); 
+            if(el) el.classList.remove('active'); 
+        });
+
+        if(view === 'admin' || view === 'adminAttLogs') {
+            if(isAdminUnlocked) {
+                if(view === 'adminAttLogs') { 
+                    document.getElementById('btnAttLogs').classList.add('active'); 
+                    document.getElementById('adminAttPanel').classList.remove('hidden'); 
+                    renderAdminAttLog(); 
+                } else { 
+                    document.getElementById('btnAdmin').classList.add('active'); 
+                    document.getElementById('adminPanel').classList.remove('hidden'); 
+                    renderAdmin(); 
+                }
+            } else { 
+                document.getElementById('btnAdmin').classList.add('active'); 
+                document.getElementById('adminLoginPanel').classList.remove('hidden'); 
+                setTimeout(() => document.getElementById('adminMasterPin').focus(), 100); 
+            }
+        } else {
+            // Set active button
+            if(view === 'loan') document.getElementById('btnLoan').classList.add('active'); 
+            if(view === 'attendance') document.getElementById('btnAtt').classList.add('active');
+            if(view === 'leave') document.getElementById('btnLeave').classList.add('active');
+
+            if(currentUser) { 
+                if(view === 'loan') showLoanPanel(); 
+                if(view === 'attendance') showAttendancePanel(); 
+                if(view === 'leave') showLeavePanel();
+            } else { 
+                targetViewAfterLogin = view; 
+                document.getElementById('loginSection').classList.remove('hidden'); 
+                loadEmpSelect(); 
+            }
+        }
+    }
+
+    // PANEL FUNCTIONS
+    function showLoanPanel() { 
+        document.getElementById('loanPanel').classList.remove('hidden'); 
+        const k = getKeys(); 
+        const deds = db.txns.filter(t => t.empId === currentUser.id && (t.status === 'Paid' || !t.status) && t.date.startsWith(k.currIso)).reduce((s, t) => s + t.amount, 0); 
+        document.getElementById('loanName').innerText = `Hello, ${currentUser.name}`; 
+        document.getElementById('dashNet').innerText = (currentUser.salary - deds).toLocaleString(); 
+        const list = document.getElementById('dashHistory'); 
+        list.innerHTML = ''; 
+        db.txns.filter(t => t.empId === currentUser.id).reverse().slice(0, 5).forEach(t => { 
+            const isCash = t.method === 'Cash'; 
+            list.innerHTML += `<div class="req-history-item"><div><div style="font-weight:700;">${isCash ? '💵 ' : ''}${t.amount.toLocaleString()}</div><div style="font-size:0.8rem; color:#64748b;">${formatDate(t.date)}</div></div><span class="status-badge ${t.status==='Paid'?'status-paid':'status-pending'}">${t.status}</span></div>`; 
+        }); 
+    }
+    
+    function showLeavePanel() { 
+        document.getElementById('leavePanel').classList.remove('hidden'); 
+        document.getElementById('leaveName').innerText = `Hello, ${currentUser.name}`; 
+        renderLeaveList(); 
+    }
+    
+    function showAttendancePanel() { 
+        document.getElementById('attPanel').classList.remove('hidden'); 
+        document.getElementById('attName').innerText = `Hello, ${currentUser.name}`; 
+        renderAttPanel(); 
+    }
+
+    // IP & ATTENDANCE LOGIC
+    async function getIP() {
+        try { 
+            const r = await fetch('https://api.ipify.org?format=json'); 
+            const d = await r.json(); 
+            return d.ip; 
+        } catch(e) { 
+            return null; 
+        }
+    }
+
+    async function setOfficeIP() {
+        if(!confirm("Set CURRENT internet connection as Office Location?")) return;
+        showLoading();
+        const ip = await getIP();
+        hideLoading();
+        if(ip) { 
+            localStorage.setItem('ph_office_ip', ip); 
+            officeIP = ip; 
+            showNotification(`Office IP Set: ${ip}`, "success");
+        } else {
+            showNotification("Could not fetch IP. Check internet.", "error");
+        }
+    }
+
+    async function renderAttPanel() {
+        const now = new Date(); 
+        document.getElementById('clockDisplay').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:true}); 
+        document.getElementById('dateDisplay').innerText = now.toLocaleDateString([], {weekday:'long', day:'numeric', month:'short'});
+        const todayIso = now.toISOString().slice(0, 10); 
+        let record = db.attendance.find(a => a.empId === currentUser.id && a.date === todayIso);
+        let leave = db.leaves.find(l => l.empId === currentUser.id && l.date === todayIso);
+        const btn = document.getElementById('attBtn'); 
+        const txt = document.getElementById('attBtnText'); 
+        const msg = document.getElementById('ipMsg');
+        
+        btn.className = "punch-btn btn-locked"; 
+        txt.innerText = "Checking..."; 
+        btn.disabled = true; 
+        msg.innerText = "";
+
+        // Check IP
+        if(officeIP) {
+            const currentIP = await getIP();
+            if(currentIP !== officeIP) {
+                btn.className = "punch-btn btn-locked"; 
+                txt.innerText = "🚫 Restricted"; 
+                msg.innerText = "Wrong Location - Connect to Office WiFi";
+                return;
+            }
+        } else {
+            msg.innerText = "(No Office IP set - Open Mode)";
+        }
+
+        if (record) {
+            if (!record.clockOut) { 
+                btn.className = "punch-btn btn-out"; 
+                txt.innerText = "CLOCK OUT"; 
+                btn.disabled = false; 
+            } else { 
+                btn.className = "punch-btn btn-done"; 
+                txt.innerText = "DONE"; 
+                btn.disabled = true; 
+            }
+        } else if (leave) {
+            btn.className = "punch-btn btn-done"; 
+            txt.innerText = "ON LEAVE"; 
+            btn.disabled = true;
+        } else {
+            btn.className = "punch-btn btn-in"; 
+            txt.innerText = "CLOCK IN"; 
+            btn.disabled = false;
+        }
+
+        const list = document.getElementById('attHistoryList'); 
+        list.innerHTML = '';
+        db.attendance.filter(a => a.empId === currentUser.id).reverse().slice(0, 5).forEach(a => { 
+            list.innerHTML += `<div class="req-history-item"><div><strong>${formatDate(a.date)}</strong></div><div style="color:#64748b; font-size:0.8rem;">${a.clockIn} - ${a.clockOut || '...'}</div></div>`; 
+        });
+    }
+
+    function toggleAttendance() { 
+        const today = new Date().toISOString().slice(0, 10); 
+        const nowTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); 
+        
+        const hasLeave = db.leaves.find(l => l.empId === currentUser.id && l.date === today);
+        let record = db.attendance.find(a => a.empId === currentUser.id && a.date === today);
+        
+        if (!record && hasLeave) { 
+            if(!confirm("⚠️ You have a leave record. Mark yourself Present?")) return; 
+        }
+
+        if (!record) { 
+            db.attendance.push({ id: Date.now(), empId: currentUser.id, date: today, clockIn: nowTime, clockOut: null }); 
+            showNotification("Clocked IN successfully", "success");
+        } else if (!record.clockOut) { 
+            record.clockOut = nowTime; 
+            showNotification("Clocked OUT successfully", "success");
+        } 
+        save(); 
+        renderAttPanel(); 
+    }
+
+    // LEAVE LOGIC
+    function openLeaveModal() { 
+        const today = new Date().toISOString().slice(0, 10);
+        document.getElementById('leaveDate').value = today;
+        document.getElementById('leaveDate').min = today;
+        document.getElementById('leaveReason').value = ''; 
+        document.getElementById('leaveModal').style.display='flex'; 
+    }
+    
+    function submitLeave() {
+        const date = document.getElementById('leaveDate').value; 
+        const reason = document.getElementById('leaveReason').value;
+        if(!date || !reason) {
+            showNotification("All fields are required", "error");
+            return;
+        }
+        db.leaves.push({ id: Date.now(), empId: currentUser.id, date: date, reason: reason });
+        closeModal('leaveModal'); 
+        save(); 
+        showLeavePanel(); 
+        showNotification("Leave application submitted", "success");
+    }
+    
+    function renderLeaveList() {
+        const list = document.getElementById('leaveHistoryList'); 
+        list.innerHTML = '';
+        db.leaves.filter(l => l.empId === currentUser.id).reverse().forEach(l => {
+            list.innerHTML += `<div class="req-history-item"><div><strong>${formatDate(l.date)}</strong><div style="font-size:0.8rem; color:#64748b;">${l.reason}</div></div><span class="status-badge status-pending">Pending</span></div>`;
+        });
+    }
+
+    // SEARCH FUNCTIONALITY
+    function filterEmployees() {
+        const searchTerm = document.getElementById('empSearch').value.toLowerCase();
+        const cards = document.querySelectorAll('.emp-card');
+        
+        cards.forEach(card => {
+            const name = card.querySelector('h3').textContent.toLowerCase();
+            const shouldShow = name.includes(searchTerm);
+            card.style.display = shouldShow ? 'block' : 'none';
+        });
+    }
+
+    // EMPLOYEE STATISTICS
+    function showEmployeeStats(empId) {
+        const emp = db.emps.find(e => e.id === empId);
+        const today = new Date().toISOString().slice(0, 10);
+        const monthStart = new Date().toISOString().slice(0, 7) + '-01';
+        
+        const stats = {
+            presentDays: db.attendance.filter(a => a.empId === empId && a.date >= monthStart && a.clockIn).length,
+            lateDays: db.attendance.filter(a => a.empId === empId && a.date >= monthStart).filter(a => {
+                return a.clockIn && emp.start && parseTimeStr(a.clockIn) > parseInput(emp.start);
+            }).length,
+            leaveDays: db.leaves.filter(l => l.empId === empId && l.date >= monthStart).length,
+            totalAdvances: db.txns.filter(t => t.empId === empId && t.date >= monthStart).reduce((s, t) => s + t.amount, 0)
+        };
+        
+        alert(`${emp.name}'s Monthly Stats:\n\n✅ Present: ${stats.presentDays} days\n⏰ Late: ${stats.lateDays} days\n🏖️ Leave: ${stats.leaveDays} days\n💰 Advances: ${stats.totalAdvances.toLocaleString()}`);
+    }
+
+    // CORE & ADMIN FUNCTIONS
+    function renderAdmin() {
+        const k = getKeys(); 
+        document.getElementById('monthDisplay').innerText = k.display; 
+        updateMonthStatus();
+        
+        const pending = db.txns.filter(t => t.status === 'Pending'); 
+        document.getElementById('pendingAlert').style.display = pending.length ? 'block' : 'none';
+        document.getElementById('pendingList').innerHTML = pending.map(p => `<div class="req-history-item"><span><strong>${db.emps.find(e=>e.id===p.empId).name}</strong>: ${p.amount}</span><div><button class="record-btn" style="background:#dcfce7; color:#059669; padding:5px 10px;" onclick="approve(${p.id})">Approve</button> <button class="record-btn" style="background:#fee2e2; color:#ef4444; padding:5px 10px;" onclick="reject(${p.id})">Reject</button></div></div>`).join('');
+        
+        const grid = document.getElementById('adminGrid'); 
+        grid.innerHTML = ''; 
+        const today = new Date().toISOString().slice(0, 10);
+        
+        db.emps.forEach(emp => {
+            const deds = db.txns.filter(t => t.empId === emp.id && (t.status === 'Paid' || !t.status) && t.date.startsWith(k.prevIso)).reduce((s, t) => s + t.amount, 0);
+            const track = db.txns.filter(t => t.empId === emp.id && t.date.startsWith(k.currIso)).reduce((s, t) => s + t.amount, 0);
+            const att = db.attendance.find(a => a.empId === emp.id && a.date === today);
+            grid.innerHTML += `
+                <div class="emp-card">
+                    <div class="card-header">
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <div class="emp-avatar">${emp.name[0]}
+                                <div class="status-dot ${att&&att.clockIn&&!att.clockOut?'status-present':''}"></div>
+                            </div>
+                            <div class="emp-info">
+                                <h3>${emp.name}</h3>
+                                <p>Salary: ${emp.salary.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <button class="settings-btn" onclick="openEditModal(${emp.id})">⚙️</button>
+                    </div>
+                    <div class="balance-section">
+                        <div class="net-pay-label">Net Payable</div>
+                        <div class="net-pay-val">${(emp.salary-deds).toLocaleString()}</div>
+                        <div class="deduction-text">Less: ${k.prevLabel} Adv (-${deds})</div>
+                    </div>
+                    <div class="tracking-box">
+                        <div>
+                            <div class="track-info">Tracking: ${k.currLabel}</div>
+                        </div>
+                        <div>
+                            <span class="track-val">${track}</span>
+                            <button class="edit-track-btn" onclick="openManualModal(${emp.id})">+</button>
+                            <button class="edit-track-btn" onclick="openHistory(${emp.id})">History</button>
+                            <button class="edit-track-btn" onclick="showEmployeeStats(${emp.id})" style="margin-left:5px;">📊</button>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function parseTimeStr(t){ 
+        if(!t) return 0; 
+        const m=t.match(/(\d+):(\d+)\s*(AM|PM)/i); 
+        if(!m) return 0; 
+        let[_,h,min,mod]=m; 
+        h=parseInt(h); 
+        if(h===12) h=0; 
+        if(mod.toUpperCase()==='PM') h+=12; 
+        return h*60+parseInt(min); 
+    }
+    
+    function parseInput(t){ 
+        if(!t) return 0; 
+        const[h,m]=t.split(':'); 
+        return parseInt(h)*60+parseInt(m); 
+    }
+
+    function getAttendanceList() {
+        const { currIso } = getKeys();
+        const year = viewDate.getFullYear(); 
+        const month = viewDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const today = new Date();
+        const limitDay = (today.getFullYear()===year && today.getMonth()===month) ? today.getDate() : daysInMonth;
+        const startFilter = localStorage.getItem('ph_start_date') || '2000-01-01';
+        let data = [];
+        
+        for(let d=1; d<=limitDay; d++) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            if(dateStr < startFilter) continue;
+            
+            db.emps.forEach(emp => {
+                const log = db.attendance.find(a => a.empId === emp.id && a.date === dateStr);
+                const leave = db.leaves.find(l => l.empId === emp.id && l.date === dateStr);
+                
+                if(log) { 
+                    data.push({ date: dateStr, name: emp.name, in: log.clockIn, out: log.clockOut, status: (log.clockIn&&log.clockOut)?'Done':'Active', emp: emp }); 
+                } else if(leave) { 
+                    data.push({ date: dateStr, name: emp.name, in: 'NA', out: 'NA', status: 'Leave', reason: leave.reason, emp: emp }); 
+                } else if(dateStr < today.toISOString().slice(0,10)) { 
+                    data.push({ date: dateStr, name: emp.name, in: 'NA', out: 'NA', status: 'Absent', emp: emp }); 
+                }
+            });
+        }
+        return data.sort((a,b) => b.date.localeCompare(a.date));
+    }
+
+    function renderAdminAttLog() {
+        const { display } = getKeys(); 
+        document.getElementById('attLogDisplay').innerText = display;
+        const tbody = document.getElementById('attTableBody'); 
+        tbody.innerHTML = '';
+        const rows = getAttendanceList();
+        
+        if(!rows.length) { 
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8">No records</td></tr>'; 
+            return; 
+        }
+        
+        rows.forEach(r => {
+            let badge = 'present-badge', statusTxt = r.status;
+            if(r.status === 'Absent') badge = 'red-absent-badge';
+            if(r.status === 'Leave') { badge = 'leave-badge'; statusTxt = "On Leave"; }
+            
+            let inCls='text-norm', outCls='text-norm';
+            if(r.status === 'Done' || r.status === 'Active') {
+                if(r.emp.start && parseTimeStr(r.in) > parseInput(r.emp.start)) inCls='text-red';
+                if(r.emp.end && r.out && parseTimeStr(r.out) < parseInput(r.emp.end)) outCls='text-red';
+            } else { 
+                inCls='text-na'; 
+                outCls='text-na'; 
+            }
+            
+            const tooltip = r.reason ? `title="${r.reason}"` : '';
+            tbody.innerHTML += `<tr>
+                <td>${formatDate(r.date)}</td>
+                <td><strong>${r.name}</strong></td>
+                <td><span class="${inCls}">${r.in}</span></td>
+                <td><span class="${outCls}">${r.out||'NA'}</span></td>
+                <td><span class="${badge}" ${tooltip}>${statusTxt}</span></td>
+            </tr>`;
+        });
+    }
+
+    function exportAttendance() {
+        const rows = getAttendanceList(); 
+        if(!rows.length) {
+            showNotification("No attendance data to export", "warning");
+            return;
+        }
+        
+        let csv = "Date,Employee,In,Out,Status,Note\n";
+        rows.forEach(r => csv += `${r.date},"${r.name}",${r.in},${r.out||'NA'},${r.status},"${r.reason||''}"\n`);
+        const link = document.createElement("a"); 
+        link.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); 
+        link.download = `Attendance-${new Date().toISOString().slice(0,10)}.csv`; 
+        link.click();
+        showNotification("Attendance data exported", "success");
+    }
+    
+    function clearHistory() { 
+        if(confirm("⚠️ Start fresh from TODAY? This will delete all older records.")) { 
+            const t = new Date().toISOString().slice(0,10); 
+            localStorage.setItem('ph_start_date', t); 
+            db.attendance = db.attendance.filter(a => a.date >= t); 
+            db.leaves = db.leaves.filter(l => l.date >= t); 
+            save(); 
+            renderAdminAttLog(); 
+            showNotification("Attendance history cleared from today", "success");
+        } 
+    }
+
+    // BACKUP & RESTORE FUNCTIONS
+    function exportBackup() {
+        const backup = {
+            emps: db.emps,
+            txns: db.txns,
+            attendance: db.attendance,
+            leaves: db.leaves,
+            officeIP: officeIP,
+            exportDate: new Date().toISOString(),
+            version: "1.0"
+        };
+        
+        const dataStr = JSON.stringify(backup, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        const link = document.createElement('a');
+        link.setAttribute('href', dataUri);
+        link.setAttribute('download', `prohaven-backup-${new Date().toISOString().slice(0,10)}.json`);
+        link.click();
+        showNotification("Backup file downloaded", "success");
+    }
+
+    function importBackup(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (confirm("⚠️ This will OVERWRITE all current data. Are you sure?")) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    db.emps = backup.emps || [];
+                    db.txns = backup.txns || [];
+                    db.attendance = backup.attendance || [];
+                    db.leaves = backup.leaves || [];
+                    officeIP = backup.officeIP || "";
+                    save();
+                    showNotification("✅ Data restored successfully!", "success");
+                    setTimeout(() => location.reload(), 1000);
+                } catch (err) {
+                    showNotification("❌ Invalid backup file format", "error");
+                }
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; // Reset input
+    }
+
+    // MODAL FUNCTIONS
+    function openAddModal(){ 
+        if(!isAdminUnlocked) return switchView('admin'); 
+        document.getElementById('editEmpId').value = ""; 
+        document.getElementById('newEmpName').value = ""; 
+        document.getElementById('newEmpSalary').value = ""; 
+        document.getElementById('newEmpPhone').value = ""; 
+        document.getElementById('newEmpPin').value = ""; 
+        document.getElementById('newEmpStart').value = ""; 
+        document.getElementById('newEmpEnd').value = ""; 
+        document.getElementById('modalTitle').innerText = "Add New Team Member"; 
+        document.getElementById('btnDeleteEmp').classList.add('hidden'); 
+        document.getElementById('addModal').style.display = 'flex'; 
+    }
+    
+    function openEditModal(id){ 
+        const e = db.emps.find(x => x.id == id); 
+        document.getElementById('editEmpId').value = e.id; 
+        document.getElementById('newEmpName').value = e.name; 
+        document.getElementById('newEmpSalary').value = e.salary; 
+        document.getElementById('newEmpPhone').value = e.phone; 
+        document.getElementById('newEmpPin').value = e.pin; 
+        document.getElementById('newEmpStart').value = e.start || ""; 
+        document.getElementById('newEmpEnd').value = e.end || ""; 
+        document.getElementById('modalTitle').innerText = "Edit Employee"; 
+        document.getElementById('btnDeleteEmp').classList.remove('hidden'); 
+        document.getElementById('addModal').style.display='flex'; 
+    }
+    
+    function saveEmployee(){ 
+        const id = document.getElementById('editEmpId').value, 
+              name = document.getElementById('newEmpName').value, 
+              salary = parseFloat(document.getElementById('newEmpSalary').value), 
+              phone = document.getElementById('newEmpPhone').value, 
+              pin = document.getElementById('newEmpPin').value, 
+              start = document.getElementById('newEmpStart').value, 
+              end = document.getElementById('newEmpEnd').value; 
+        
+        if(!name || isNaN(salary) || !pin) {
+            showNotification("Please fill all required fields", "error");
+            return;
+        }
+        
+        if(id) { 
+            const e = db.emps.find(x => x.id == id); 
+            e.name = name; 
+            e.salary = salary; 
+            e.phone = phone; 
+            e.pin = pin; 
+            e.start = start; 
+            e.end = end; 
+            showNotification(`Updated ${name}`, "success");
+        } else { 
+            db.emps.push({id: Date.now(), name, salary, phone, pin, start, end}); 
+            showNotification(`Added ${name} to team`, "success");
+        }
+        
+        closeModal('addModal'); 
+        save(); 
+    }
+    
+    function deleteEmployee(){ 
+        if(confirm("Are you sure you want to delete this employee?")){ 
+            const id = document.getElementById('editEmpId').value; 
+            const emp = db.emps.find(e => e.id == id);
+            db.emps = db.emps.filter(e => e.id != id); 
+            save(); 
+            closeModal('addModal'); 
+            showNotification(`Deleted ${emp.name}`, "warning");
+        } 
+    }
+    
+    function openManualModal(id){ 
+        document.getElementById('manualEmpId').value = id; 
+        document.getElementById('manualModal').style.display='flex'; 
+    }
+    
+    function saveManualAdvance(){ 
+        const amount = parseFloat(document.getElementById('manualAmount').value);
+        if(isNaN(amount) || amount <= 0) {
+            showNotification("Please enter a valid amount", "error");
+            return;
+        }
+        
+        const empId = parseInt(document.getElementById('manualEmpId').value);
+        const emp = db.emps.find(e => e.id == empId);
+        db.txns.push({
+            id: Date.now(), 
+            empId: empId, 
+            amount: amount, 
+            date: new Date().toISOString().slice(0,10), 
+            status: 'Paid', 
+            method: 'Cash'
+        }); 
+        closeModal('manualModal'); 
+        save(); 
+        showNotification(`Recorded cash advance for ${emp.name}`, "success");
+    }
+    
+    function openHistory(id){ 
+        const k = getKeys(); 
+        const list = document.getElementById('histList'); 
+        list.innerHTML = ''; 
+        db.txns.filter(t => t.empId == id && t.date.startsWith(k.currIso)).forEach(t => { 
+            const isCash = t.method === 'Cash'; 
+            list.innerHTML += `<div class="history-row"><span>${formatDate(t.date)}: <strong>${isCash?'💵 ':''}${t.amount.toLocaleString()}</strong></span><button class="del-btn" onclick="deleteTxn(${t.id},${id})">×</button></div>`; 
+        }); 
+        document.getElementById('historyModal').style.display='flex'; 
+    }
+    
+    function deleteTxn(tid, eid){ 
+        if(confirm("Delete this transaction?")){ 
+            db.txns = db.txns.filter(t => t.id != tid); 
+            save(); 
+            openHistory(eid); 
+            showNotification("Transaction deleted", "warning");
+        } 
+    }
+    
+    function submitRequest(){ 
+        const amount = parseFloat(document.getElementById('reqAmount').value);
+        if(isNaN(amount) || amount <= 0) {
+            showNotification("Please enter a valid amount", "error");
+            return;
+        }
+        
+        if(amount > currentUser.salary * 0.5) {
+            if(!confirm(`Requesting ${amount} (more than 50% of salary). Continue?`)) return;
+        }
+        
+        db.txns.push({
+            id: Date.now(), 
+            empId: currentUser.id, 
+            amount: amount, 
+            date: new Date().toISOString().slice(0,10), 
+            status: 'Pending'
+        }); 
+        document.getElementById('reqAmount').value = ''; 
+        save(); 
+        showLoanPanel(); 
+        showNotification("Loan request submitted for approval", "success");
+    }
+    
+    function approve(id){ 
+        const t = db.txns.find(x => x.id == id); 
+        t.status = 'Paid'; 
+        save(); 
+        showNotification("Loan request approved", "success");
+    }
+    
+    function reject(id){ 
+        if(confirm("Reject this loan request?")) {
+            db.txns = db.txns.filter(x => x.id != id); 
+            save(); 
+            showNotification("Loan request rejected", "warning");
+        }
+    }
+    
+    function closeModal(id){ 
+        document.getElementById(id).style.display='none'; 
+    }
+    
+    function loadEmpSelect(){ 
+        const s = document.getElementById('empSelect'); 
+        s.innerHTML = '<option value="">Select Profile</option>'; 
+        // Show Name ONLY (No Salary)
+    db.emps.forEach(e => s.innerHTML += `<option value="${e.id}">${e.name}</option>`); 
+    }
+
+    // INITIALIZE
+    setInterval(() => { 
+        if(!document.getElementById('attPanel').classList.contains('hidden')) renderAttPanel(); 
+    }, 30000);
+    
+    switchView('admin');
+    
+    // Auto-save every 30 seconds
+    setInterval(() => {
+        save();
+    }, 30000);
+</script>
+
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script>
+    (function initUI() {
+        const setHTML = (sel, html) => { const el = document.querySelector(sel); if(el) el.innerHTML = html; };
+        setHTML('.brand', `<i class="ph-fill ph-package" style="color:#3b82f6;"></i> Pro Haven`);
+        setHTML('#btnAdmin', `<i class="ph-bold ph-chart-pie-slice"></i> Admin Dashboard`);
+        setHTML('#btnAttLogs', `<i class="ph-bold ph-table"></i> Attendance Logs`);
+        setHTML('#btnLoan', `<i class="ph-bold ph-wallet"></i> Advance Loan Portal`);
+        setHTML('#btnAtt', `<i class="ph-bold ph-fingerprint"></i> Attendance Portal`);
+        setHTML('#btnLeave', `<i class="ph-bold ph-coffee"></i> Leave Portal`);
+        
+        const style = document.createElement('style');
+        style.innerHTML = `.nav-btn i { margin-right: 8px; font-size: 1.1rem; vertical-align: middle; }`;
+        document.head.appendChild(style);
+
+        const keyEl = document.getElementById('masterKeyDisplay');
+        if(keyEl && keyEl.parentElement) keyEl.parentElement.style.display = 'none';
+
+        const pinLabel = Array.from(document.querySelectorAll('label')).find(l => l.innerText.includes('Login PIN'));
+        if (pinLabel && !document.getElementById('newEmpType')) {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:5px;">Work Mode</label>
+                <select id="newEmpType" class="input-box" style="width:100%; margin-bottom:15px; box-sizing:border-box;">
+                    <option value="Office">🏢 Office Based (IP Restricted)</option>
+                    <option value="Remote">🌍 Remote (Anywhere)</option>
+                </select>`;
+            pinLabel.parentNode.insertBefore(div, pinLabel);
+        }
+    })();
+
+    window.saveEmployee = async function() {
+        const id = document.getElementById('editEmpId').value, 
+              name = document.getElementById('newEmpName').value, 
+              salary = parseFloat(document.getElementById('newEmpSalary').value), 
+              phone = document.getElementById('newEmpPhone').value, 
+              pin = document.getElementById('newEmpPin').value, 
+              start = document.getElementById('newEmpStart').value, 
+              end = document.getElementById('newEmpEnd').value,
+              type = document.getElementById('newEmpType').value;
+
+        if(!name || isNaN(salary) || !pin) { alert("Please fill fields."); return; }
+        
+        const btn = document.querySelector('#addModal button.modal-btn-primary');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "Saving to Cloud...";
+        btn.disabled = true;
+
+        try {
+            const newEmp = { id: id ? parseInt(id) : Date.now(), name, salary, phone, pin, start, end, type };
+            if(id) { 
+                const idx = window.db.emps.findIndex(x => x.id == id);
+                if(idx > -1) window.db.emps[idx] = newEmp;
+            } else {
+          // ✅ SAFE MODE: Adds 1 person without deleting other data
+          const safeSuccess = await window.addSafe('emps', newEmp);
+          
+          // If successful, update the screen and STOP here
+          if(safeSuccess) {
+              showNotification("Added " + name, "success");
+              document.getElementById('addModal').style.display='none';
+              if(window.renderAdmin) window.renderAdmin();
+              if(window.loadEmpSelect) window.loadEmpSelect();
+          }
+          return; // 🛑 IMPORTANT: Stop here! Don't run window.save() below.
+      }
+
+      // ⚠ OLD MODE: Only runs if you are EDITING an existing person
+      const success = await window.save();
+            if(success) {
+                showNotification(id ? `Updated ${name}` : `Added ${name}`, "success");
+                document.getElementById('addModal').style.display='none'; 
+                if(window.renderAdmin) window.renderAdmin();
+                if(window.loadEmpSelect) window.loadEmpSelect();
+            } else {
+                if(!id) window.db.emps.pop(); 
+                alert("❌ Save Failed: Cloud rejected data.");
+            }
+        } catch(e) { console.error(e); alert("Error: " + e.message); } 
+        finally { btn.innerHTML = originalText; btn.disabled = false; }
+    };
+
+    window.openEditModal = function(id) {
+        const e = window.db.emps.find(x => x.id == id); 
+        document.getElementById('editEmpId').value = e.id; 
+        document.getElementById('newEmpName').value = e.name; 
+        document.getElementById('newEmpSalary').value = e.salary; 
+        document.getElementById('newEmpPhone').value = e.phone; 
+        document.getElementById('newEmpPin').value = e.pin; 
+        document.getElementById('newEmpStart').value = e.start || ""; 
+        document.getElementById('newEmpEnd').value = e.end || ""; 
+        const typeBox = document.getElementById('newEmpType');
+        if(typeBox) typeBox.value = e.type || 'Office';
+        document.getElementById('modalTitle').innerText = "Edit Employee"; 
+        document.getElementById('btnDeleteEmp').classList.remove('hidden'); 
+        document.getElementById('addModal').style.display='flex'; 
+    };
+
+    window.loadEmpSelect = function() {
+        const s = document.getElementById('empSelect');
+        if(!s) return;
+        s.innerHTML = '<option value="">Select Profile</option>';
+        (window.db.emps || []).forEach(e => s.innerHTML += `<option value="${e.id}">${e.name}</option>`);
+        if(!document.getElementById('btnRefreshList')) {
+            const btn = document.createElement('div');
+            btn.id = 'btnRefreshList';
+            btn.innerHTML = '↻ Refresh List';
+            btn.style = 'text-align:right; margin-top:5px; color:#3b82f6; cursor:pointer; font-size:0.8rem; font-weight:600;';
+            btn.onclick = function() {
+                btn.innerHTML = 'Loading...';
+                if(window.initApp) window.initApp().then(() => btn.innerHTML = '✓ List Updated');
+            };
+            s.parentNode.insertBefore(btn, s.nextSibling);
+        }
+    };
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWJeV0SsyG4NdsH8CcVi0uCaYmJosiB1k",
+        authDomain: "prohaven-e521f.firebaseapp.com",
+        databaseURL: "https://prohaven-e521f-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "prohaven-e521f",
+        storageBucket: "prohaven-e521f.firebasestorage.app",
+        messagingSenderId: "1015689255068",
+        appId: "1:1015689255068:web:8746a632cea34eddc7b559"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const dbCloud = getFirestore(app);
+    
+    // ☢️ SECURE DATABASE: Clean Slate
+    const COLLECTION_NAME = "pro_haven_secure";
+    const DOC_ID = "master_data"; 
+
+    if (!window.db) window.db = { emps: [], txns: [], attendance: [], leaves: [], officeIP: null };
+
+    window.initApp = async function() {
+        const loader = document.getElementById('appLoader');
+        try {
+            const docRef = doc(dbCloud, COLLECTION_NAME, DOC_ID);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const cloudData = docSnap.data();
+                window.db.emps = cloudData.emps || [];
+                window.db.txns = cloudData.txns || [];
+                window.db.attendance = cloudData.attendance || [];
+                window.db.leaves = cloudData.leaves || [];
+                window.db.officeIP = cloudData.officeIP || null;
+            } else {
+                console.log("🌟 Clean Slate Started.");
+                window.db.emps = [];
+                window.db.txns = [];
+                window.db.attendance = [];
+                window.db.leaves = [];
+            }
+            
+            finishLoad(loader);
+
+        } catch (error) {
+            console.error(error);
+            if(loader) {
+                document.getElementById('lText').innerText = "Connection Failed";
+                document.getElementById('lText').style.color = "#ef4444";
+                document.getElementById('btnOffline').style.display = "block";
+            }
+        }
+    };
+
+    function finishLoad(loader) {
+        if(typeof renderAdmin === 'function') renderAdmin();
+        if(window.loadEmpSelect) window.loadEmpSelect();
+        updateStatus("☁️ Synced", "#10b981");
+        if(loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 500); }
+        const style = document.createElement('style');
+        style.innerHTML = `body > *:not(#appLoader) { filter: none !important; }`;
+        document.head.appendChild(style);
+    }
+
+    window.save = async function() {
+        try {
+            updateStatus("🔄 Syncing...", "#f59e0b");
+            await setDoc(doc(dbCloud, COLLECTION_NAME, DOC_ID), {
+                emps: window.db.emps, txns: window.db.txns, attendance: window.db.attendance,
+                leaves: window.db.leaves, officeIP: window.db.officeIP || null,
+                lastUpdated: new Date().toISOString()
+            }, { merge: true });
+
+            localStorage.setItem('ph_emps', JSON.stringify(window.db.emps));
+            localStorage.setItem('ph_txns', JSON.stringify(window.db.txns));
+            localStorage.setItem('ph_att', JSON.stringify(window.db.attendance));
+            localStorage.setItem('ph_leaves', JSON.stringify(window.db.leaves));
+            localStorage.setItem('ph_office_ip', window.db.officeIP || "");
+            
+            updateStatus("☁️ Synced", "#10b981");
+            return true;
+        } catch(e) {
+            console.error("Save Failed:", e);
+            updateStatus("⚠️ Save Failed", "#ef4444");
+            return false;
+        }// BIG COMPANY FIX: Adds 1 item safely without overwriting others
+window.addSafe = async function(listName, newItem) {
+    try {
+        updateStatus("☁ Safe Saving...", "#f59e0b");
+
+        // 1. Send ONLY the new item to the cloud
+        await updateDoc(doc(dbCloud, COLLECTION_NAME, DOC_ID), {
+            [listName]: arrayUnion(newItem)
+        });
+
+        // 2. Update your local screen immediately
+        if (!window.db[listName]) window.db[listName] = [];
+        window.db[listName].push(newItem);
+        
+        // 3. Save to local phone memory
+        if(listName === 'emps') localStorage.setItem('ph_emps', JSON.stringify(window.db.emps));
+        if(listName === 'attendance') localStorage.setItem('ph_att', JSON.stringify(window.db.attendance));
+        if(listName === 'txns') localStorage.setItem('ph_txns', JSON.stringify(window.db.txns));
+        if(listName === 'leaves') localStorage.setItem('ph_leaves', JSON.stringify(window.db.leaves));
+
+        updateStatus("☁ Saved Safe", "#10b981");
+        return true;
+    } catch(e) {
+        console.error(e);
+        alert("Save Failed: " + e.message);
+        updateStatus("⚠ Save Failed", "#ef4444");
+        return false;
+    }
+};
+    };
+
+    window.markAttendance = async function(type) {
+        const user = window.currentUser || currentUser;
+        if (!user) { alert("Error: Not logged in."); return; }
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<i class="ph-bold ph-spinner ph-spin"></i> Verifying...`; btn.disabled = true;
+
+        try {
+            const isRemote = (user.type === 'Remote');
+            if (!isRemote && window.db.officeIP) {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                if (data.ip !== window.db.officeIP) throw new Error("❌ Access Denied: You are not at the office.");
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            let record = window.db.attendance.find(a => a.empId === user.id && a.date === today);
+            let isNew = false;
+
+            if (!record) {
+                record = { empId: user.id, name: user.name, date: today, clockIn: null, clockOut: null };
+                isNew = true;
+            }
+
+            const oldIn = record.clockIn; const oldOut = record.clockOut;
+
+            if (type === 'In') {
+                if(record.clockIn) throw new Error("Already Clocked In!");
+                record.clockIn = time;
+            } else {
+                if(!record.clockIn) throw new Error("You must Clock In first!");
+                record.clockOut = time;
+            }
+
+            // ✅ SMART SAVE: Uses Safe Mode for Clock In, Normal Save for Clock Out
+      let success;
+      if (isNew) {
+          // Clocking In: Use "Mailbox Mode" (Never deletes other data)
+          success = await window.addSafe('attendance', record);
+      } else {
+          // Clocking Out: Updating existing record (Standard Save)
+          success = await window.save();
+      }
+
+      if(success) {
+          if(window.renderEmployee) window.renderEmployee();
+          if(typeof renderAttPanel === 'function') renderAttPanel();
+          alert("✅ Success: Clocked " + type + " at " + time);
+      } else {
+          // If save failed, undo the changes
+          record.clockIn = oldIn;
+          record.clockOut = oldOut;
+      }
+        } catch(e) {
+            alert(e.message || "Connection Failed");
+        } finally {
+            btn.innerHTML = originalText; btn.disabled = false;
+        }
+    };
+
+    window.submitLeave = async function() {
+        const user = window.currentUser || currentUser;
+        if (!user) { alert("Error: Not logged in."); return; }
+        const modal = document.getElementById('leaveModal');
+        const elDate = modal.querySelector('input[type="date"]');
+        const elReason = modal.querySelector('textarea') || modal.querySelector('input[type="text"]');
+        const btn = modal.querySelector('button.primary-btn') || modal.querySelector('button[type="submit"]');
+        const start = elDate ? elDate.value : null;
+        const reason = elReason ? elReason.value : null;
+
+        if(!start || !reason) { alert("Please fill fields."); return; }
+        const originalText = btn ? btn.innerHTML : 'Submit';
+        if(btn) { btn.innerHTML = `<i class="ph-bold ph-spinner ph-spin"></i> Sending...`; btn.disabled = true; }
+
+        const leaveReq = {
+            id: Date.now(), empId: user.id, name: user.name, type: "General",
+            date: start, startDate: start, endDate: start, reason: reason, status: 'Pending',
+            appliedOn: new Date().toISOString().split('T')[0]
+        };
+
+        window.db.leaves.push(leaveReq);
+        const success = await window.save();
+
+        if(success) {
+            alert("✅ Application Sent!");
+            if(window.closeModal) window.closeModal('leaveModal');
+            if(elReason) elReason.value = '';
+            if(window.showLeavePanel) window.showLeavePanel();
+        } else { window.db.leaves.pop(); }
+        if(btn) { btn.innerHTML = originalText; btn.disabled = false; }
+    };
+
+    window.approve = async function(id) {
+        const btn = event.target.closest('button');
+        const originalText = btn ? btn.innerHTML : 'Approve';
+        if(btn) { btn.innerHTML = `<i class="ph-bold ph-spinner ph-spin"></i> Saving...`; btn.disabled = true; }
+        const t = window.db.txns.find(x => x.id === id);
+        if(t) {
+            const oldStatus = t.status; t.status = 'Paid';
+            const success = await window.save();
+            if(success) {
+                renderAdmin(); showNotification("Approved & Synced", "success");
+                const emp = window.db.emps.find(e => e.id === t.empId);
+                if(emp && emp.phone) {
+                    // FIX: Force Pakistan Time (Today)
+                    const niceDate = new Date().toLocaleDateString('en-GB', { 
+                        day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' 
+                    });
+                    const msg = `*LOAN APPROVED*%0A%0AHello ${emp.name},%0AYour advance request has been successfully approved.%0A%0A*Date:* ${niceDate}%0A*Amount:* Rs. ${t.amount.toLocaleString()}`;
+                    window.open(`https://wa.me/${emp.phone}?text=${msg}`, '_blank');
+                }
+            } else { t.status = oldStatus; }
+        }
+        if(btn) { btn.innerHTML = originalText; btn.disabled = false; }
+    };
+
+    window.reject = async function(id) {
+        const btn = event.target.closest('button');
+        const originalText = btn ? btn.innerHTML : 'Deny';
+        if(btn) { btn.innerHTML = `<i class="ph-bold ph-spinner ph-spin"></i> Saving...`; btn.disabled = true; }
+        const t = window.db.txns.find(x => x.id === id);
+        if(t) {
+            const oldStatus = t.status; t.status = 'Rejected';
+            const success = await window.save();
+            if(success) { renderAdmin(); showNotification("Request Denied", "success"); } else { t.status = oldStatus; }
+        }
+        if(btn) { btn.innerHTML = originalText; btn.disabled = false; }
+    };
+
+    window.setOfficeIP = async function() {
+        const btn = document.getElementById('btnSetIP');
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            if(confirm(`Lock Office Location to: ${data.ip}?`)) {
+                const oldIP = window.db.officeIP; window.db.officeIP = data.ip;
+                const success = await window.save();
+                if(success) showNotification("Location Locked 🔒", "success");
+                else { window.db.officeIP = oldIP; alert("Failed to lock IP. Cloud save failed."); }
+            }
+        } catch(e) { alert("Check Internet"); }
+    };
+
+    function updateStatus(msg, color) {
+        let el = document.getElementById('liveStatus');
+        if(!el) {
+             const topBar = document.querySelector('.top-bar > div:last-child');
+             if(topBar) { el = document.createElement('div'); el.id = 'liveStatus'; topBar.prepend(el); }
+        }
+        if(el) el.innerHTML = `<span style="color:${color}; font-size:0.8rem; font-weight:700; margin-right:15px;">${msg}</span>`;
+    }
+
+    window.forceOffline = function() {
+        const localEmps = localStorage.getItem('ph_emps');
+        if (localEmps) {
+            window.db.emps = JSON.parse(localEmps);
+            window.db.txns = JSON.parse(localStorage.getItem('ph_txns')||'[]');
+            window.db.attendance = JSON.parse(localStorage.getItem('ph_att')||'[]');
+            window.db.leaves = JSON.parse(localStorage.getItem('ph_leaves')||'[]');
+            if(typeof renderAdmin === 'function') renderAdmin();
+            if(window.loadEmpSelect) window.loadEmpSelect();
+            document.getElementById('appLoader').style.display = 'none';
+            const style = document.createElement('style');
+            style.innerHTML = `body > *:not(#appLoader) { filter: none !important; }`;
+            document.head.appendChild(style);
+        }
+    };
+
+    // 🔄 AUTO-ADD SYNC BUTTON
+    setTimeout(() => {
+        const topBar = document.querySelector('.top-bar div:last-child') || document.body;
+        if(!document.getElementById('btnSync')) {
+            const btn = document.createElement('button');
+            btn.id = 'btnSync';
+            btn.innerHTML = '↻ Sync Data';
+            btn.style = "margin-left:15px; padding:6px 15px; background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; border-radius:20px; font-weight:700; cursor:pointer; font-size:0.8rem;";
+            btn.onclick = async () => { 
+                btn.innerHTML = '↻ Loading...'; 
+                await window.initApp(); 
+                btn.innerHTML = '✓ Synced';
+                setTimeout(() => btn.innerHTML = '↻ Sync Data', 2000);
+            };
+            if(document.getElementById('liveStatus')) { document.getElementById('liveStatus').after(btn); } 
+            else { topBar.prepend(btn); }
+        }
+    }, 1000);
+
+    window.initApp();
+</script>
+<script>
+    // 🔄 AUTO-ADD SYNC BUTTON
+    setTimeout(() => {
+        const topBar = document.querySelector('.top-bar div:last-child') || document.body;
+        if(!document.getElementById('btnSync')) {
+            const btn = document.createElement('button');
+            btn.id = 'btnSync';
+            btn.innerHTML = '↻ Sync Data';
+            btn.style = "margin-left:15px; padding:6px 15px; background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; border-radius:20px; font-weight:700; cursor:pointer; font-size:0.8rem;";
+            btn.onclick = async () => { 
+                btn.innerHTML = '↻ Loading...'; 
+                await window.initApp(); 
+                btn.innerHTML = '✓ Synced';
+                setTimeout(() => btn.innerHTML = '↻ Sync Data', 2000);
+            };
+            if(document.getElementById('liveStatus')) { document.getElementById('liveStatus').after(btn); } 
+            else { topBar.prepend(btn); }
+        }
+    }, 1000);
+
+    window.initApp();
+</script>
+</body>
+</html>
